@@ -243,6 +243,9 @@ namespace InsertSortName
             string[] fileNames = new string[OrderListView.Items.Count];
             string[] oriFilePaths = new string[OrderListView.Items.Count];
 
+            if (Application.OpenForms.OfType<Form3>().Any()) imgForm.ResetImage();
+            form4.ResetImage();
+
             for (int i = 0; i < OrderListView.Items.Count; i++)
             {
                 fileNames[i] = OrderListView.Items[i].SubItems[1].Text;
@@ -267,7 +270,6 @@ namespace InsertSortName
                 //빠른 변환
                 if (isQuick)
                 {
-                    if (Application.OpenForms.OfType<Form3>().Any()) imgForm.ResetImage();
 
                     newPath = Path.Combine(folderPath, fileNames[i]);
                     OrderListView.Items[i].SubItems[1].Text = Path.GetFileName(newPath);
@@ -297,26 +299,36 @@ namespace InsertSortName
 
                 for (int i = 0; i < fileNames.Length; i++)
                 {
-                    if (Application.OpenForms.OfType<Form3>().Any()) imgForm.ResetImage();
-
                     newPath = Path.Combine(newFolderPath, fileNames[i]);
-
-                    OrderListView.Items[i].SubItems[1].Text = Path.GetFileName(newPath);
-                    OrderListView.Items[i].SubItems[2].Text = newPath;
-                    orderList[i].filePath = newPath;
 
                     if (isCopy)
                     {
-                        if (oriFilePaths[i] != newPath)
+                        try
                         {
                             System.IO.File.Copy(oriFilePaths[i], newPath);
                         }
-                        else
+                        catch
                         {
-                            System.IO.File.Move(oriFilePaths[i], newPath);
+                            MessageBox.Show("같은 이름의 파일이 존재합니다.");
+                            for (int j = 0; j < fileNames.Length; j++)
+                            {
+                                OrderListView.Items[j].SubItems[1].Text = Path.GetFileName(oriFilePaths[j]);
+                                OrderListView.Items[j].SubItems[2].Text = oriFilePaths[j];
+                                orderList[j].filePath = oriFilePaths[j];
+                            }
+                            return;
                         }
                     }
-                    else System.IO.File.Move(oriFilePaths[i], newPath);
+                    else
+                    {
+
+                        OrderListView.Items[i].SubItems[1].Text = Path.GetFileName(newPath);
+                        OrderListView.Items[i].SubItems[2].Text = newPath;
+                        orderList[i].filePath = newPath;
+
+                        System.IO.File.Move(oriFilePaths[i], newPath);
+                    }
+
                 }
             }
 
