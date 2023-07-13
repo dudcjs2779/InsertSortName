@@ -1,4 +1,4 @@
-﻿namespace InsertFileNumber
+﻿namespace InsertFileNumber2
 {
     partial class Form4
     {

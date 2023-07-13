@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace InsertSortName
+namespace InsertFileNumber2
 {
     public partial class Form2 : Form
     {

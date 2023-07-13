@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace InsertFileNumber
+namespace InsertFileNumber2
 {
     public partial class Form4 : Form
     {
@@ -40,7 +40,7 @@ namespace InsertFileNumber
             //}
         }
 
-        public void LoadImage(string path)
+        public void LoadImage(string path, int formWidth)
         {
             //Console.WriteLine("imageLoad");
             if (path != "")
@@ -57,8 +57,8 @@ namespace InsertFileNumber
                     height = pictureBox1.Image.Height;
 
                     float x, y;
-                    x = width / (width + height) * 512;
-                    y = height / (width + height) * 512;
+                    x = width / (width + height) * formWidth;
+                    y = height / (width + height) * formWidth;
 
                     this.Size = new Size((int)x, (int)y);
 
@@ -81,6 +81,11 @@ namespace InsertFileNumber
             }
 
             pictureBox1.Load(directory);
+        }
+
+        public void PreviewSize(int width)
+        {
+            this.Size = new Size(width, width);
         }
 
     }

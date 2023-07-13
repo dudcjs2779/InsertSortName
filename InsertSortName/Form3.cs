@@ -12,8 +12,9 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+using Image = System.Drawing.Image;
 
-namespace InsertFileNumber
+namespace InsertFileNumber2
 {
     public partial class Form3 : Form
     {
@@ -23,14 +24,15 @@ namespace InsertFileNumber
         public Form3()
         {
             InitializeComponent();
-            chkStretch.Checked = InsertFileNumber.Properties.Settings.Default.chkStretch;
-            pictureBox1.BackColor = InsertFileNumber.Properties.Settings.Default.ImgBackground;
+            chkStretch.Checked = InsertFileNumber2.Properties.Settings.Default.chkStretch;
+            pictureBox1.BackColor = InsertFileNumber2.Properties.Settings.Default.ImgBackground;
+            
         }
 
         private void Form3_Shown(object sender, EventArgs e)
         {
-            this.Location = InsertFileNumber.Properties.Settings.Default.ImgViewerLocation;
-            this.Size = InsertFileNumber.Properties.Settings.Default.ImgViewerSize;
+            this.Location = InsertFileNumber2.Properties.Settings.Default.ImgViewerLocation;
+            this.Size = InsertFileNumber2.Properties.Settings.Default.ImgViewerSize;
         }
 
         public void LoadImage()
@@ -111,11 +113,11 @@ namespace InsertFileNumber
 
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            InsertFileNumber.Properties.Settings.Default.chkStretch = chkStretch.Checked;
-            InsertFileNumber.Properties.Settings.Default.ImgBackground = pictureBox1.BackColor;
-            InsertFileNumber.Properties.Settings.Default.ImgViewerLocation = this.Location;
-            InsertFileNumber.Properties.Settings.Default.ImgViewerSize = this.Size;
-            InsertFileNumber.Properties.Settings.Default.Save();
+            InsertFileNumber2.Properties.Settings.Default.chkStretch = chkStretch.Checked;
+            InsertFileNumber2.Properties.Settings.Default.ImgBackground = pictureBox1.BackColor;
+            InsertFileNumber2.Properties.Settings.Default.ImgViewerLocation = this.Location;
+            InsertFileNumber2.Properties.Settings.Default.ImgViewerSize = this.Size;
+            InsertFileNumber2.Properties.Settings.Default.Save();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace InsertSortName
+﻿namespace InsertFileNumber2
 {
     partial class Form2
     {

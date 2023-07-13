@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace InsertFileNumber.Properties {
+namespace InsertFileNumber2.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -37,6 +37,7 @@ namespace InsertFileNumber.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Black")]
         public global::System.Drawing.Color ImgBackground {
             get {
                 return ((global::System.Drawing.Color)(this["ImgBackground"]));
@@ -103,6 +104,66 @@ namespace InsertFileNumber.Properties {
             }
             set {
                 this["MainFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool chkCopyOverwrite {
+            get {
+                return ((bool)(this["chkCopyOverwrite"]));
+            }
+            set {
+                this["chkCopyOverwrite"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool chkPreview {
+            get {
+                return ((bool)(this["chkPreview"]));
+            }
+            set {
+                this["chkPreview"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool chkImageList {
+            get {
+                return ((bool)(this["chkImageList"]));
+            }
+            set {
+                this["chkImageList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("512")]
+        public int PreviewWidth {
+            get {
+                return ((int)(this["PreviewWidth"]));
+            }
+            set {
+                this["PreviewWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("128")]
+        public int ImageListWidth {
+            get {
+                return ((int)(this["ImageListWidth"]));
+            }
+            set {
+                this["ImageListWidth"] = value;
             }
         }
     }

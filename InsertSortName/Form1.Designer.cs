@@ -1,4 +1,4 @@
-﻿namespace InsertSortName
+﻿namespace InsertFileNumber2
 {
     partial class Form1
     {
@@ -35,7 +35,7 @@
             this.BtnRemove2 = new System.Windows.Forms.Button();
             this.BtnListClear1 = new System.Windows.Forms.Button();
             this.BtnRemove1 = new System.Windows.Forms.Button();
-            this.ImgListView = new System.Windows.Forms.ListView();
+            this.WorkListView = new System.Windows.Forms.ListView();
             this.label2 = new System.Windows.Forms.Label();
             this.OrderListView = new System.Windows.Forms.ListView();
             this.BtnChange1 = new System.Windows.Forms.Button();
@@ -45,6 +45,8 @@
             this.BtnCopyToFolder = new System.Windows.Forms.Button();
             this.BtnToFolder = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
+            this.BtnSetting = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // StartNum
@@ -88,20 +90,20 @@
             this.BtnRemove1.UseVisualStyleBackColor = true;
             this.BtnRemove1.Click += new System.EventHandler(this.BtnRemove1_Click);
             // 
-            // ImgListView
+            // WorkListView
             // 
-            resources.ApplyResources(this.ImgListView, "ImgListView");
-            this.ImgListView.HideSelection = false;
-            this.ImgListView.Name = "ImgListView";
-            this.ImgListView.UseCompatibleStateImageBehavior = false;
-            this.ImgListView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.ImgListView_ItemDrag);
-            this.ImgListView.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.ImgListView_ItemSelectionChanged);
-            this.ImgListView.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragDrop);
-            this.ImgListView.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragEnter);
-            this.ImgListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ImgListView_KeyDown);
-            this.ImgListView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ImgListView_MouseDown);
-            this.ImgListView.MouseLeave += new System.EventHandler(this.ImgListView_MouseLeave);
-            this.ImgListView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ImgListView_MouseMove);
+            resources.ApplyResources(this.WorkListView, "WorkListView");
+            this.WorkListView.HideSelection = false;
+            this.WorkListView.Name = "WorkListView";
+            this.WorkListView.UseCompatibleStateImageBehavior = false;
+            this.WorkListView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.WorkListView_ItemDrag);
+            this.WorkListView.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.WorkListView_ItemSelectionChanged);
+            this.WorkListView.DragDrop += new System.Windows.Forms.DragEventHandler(this.WorkListView_DragDrop);
+            this.WorkListView.DragEnter += new System.Windows.Forms.DragEventHandler(this.WorkListView_DragEnter);
+            this.WorkListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.WorkListView_KeyDown);
+            this.WorkListView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.WorkListView_MouseDown);
+            this.WorkListView.MouseLeave += new System.EventHandler(this.WorkListView_MouseLeave);
+            this.WorkListView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.WorkListView_MouseMove);
             // 
             // label2
             // 
@@ -172,10 +174,23 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // printPreviewDialog1
+            // 
+            resources.ApplyResources(this.printPreviewDialog1, "printPreviewDialog1");
+            this.printPreviewDialog1.Name = "printPreviewDialog1";
+            // 
+            // BtnSetting
+            // 
+            resources.ApplyResources(this.BtnSetting, "BtnSetting");
+            this.BtnSetting.Name = "BtnSetting";
+            this.BtnSetting.UseVisualStyleBackColor = true;
+            this.BtnSetting.Click += new System.EventHandler(this.BtnSetting_Click);
+            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             resources.ApplyResources(this, "$this");
+            this.Controls.Add(this.BtnSetting);
             this.Controls.Add(this.BtnToFolder);
             this.Controls.Add(this.BtnCopyToFolder);
             this.Controls.Add(this.BtnToEnd);
@@ -191,7 +206,7 @@
             this.Controls.Add(this.BtnListClear2);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.BtnListClear1);
-            this.Controls.Add(this.ImgListView);
+            this.Controls.Add(this.WorkListView);
             this.KeyPreview = true;
             this.Name = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -209,7 +224,7 @@
         private System.Windows.Forms.Button BtnListClear2;
         private System.Windows.Forms.Button BtnRemove1;
         private System.Windows.Forms.Button BtnListClear1;
-        private System.Windows.Forms.ListView ImgListView;
+        private System.Windows.Forms.ListView WorkListView;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ListView OrderListView;
         private System.Windows.Forms.Button BtnImgViewer;
@@ -219,6 +234,8 @@
         private System.Windows.Forms.Button BtnCopyToFolder;
         private System.Windows.Forms.Button BtnToFolder;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
+        private System.Windows.Forms.Button BtnSetting;
     }
 }
 

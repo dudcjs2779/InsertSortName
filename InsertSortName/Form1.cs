@@ -1,5 +1,4 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
-using InsertFileNumber;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,70 +14,104 @@ using Task = System.Threading.Tasks.Task;
 
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace InsertSortName
+namespace InsertFileNumber2
 {
     public partial class Form1 : Form
     {
         private readonly SynchronizationContext synchronizationContext;
         private DateTime previousTime = DateTime.Now;
 
-        List<ImageInfo> imageList = new List<ImageInfo>();
-        List<ListViewItem> imgListView_SelectedItemList = new List<ListViewItem>();
+        List<ImageInfo> workList = new List<ImageInfo>();
+        List<ListViewItem> workListView_SelectedItemList = new List<ListViewItem>();
+        public ImageList imageList = new ImageList();
 
         List<ImageInfo> orderList = new List<ImageInfo>();
         List<ListViewItem> orderListView_SelectedItemList = new List<ListViewItem>();
 
-        List<int> imageListindexList = new List<int>();
+        List<int> workListindexList = new List<int>();
         List<int> orderListindexList = new List<int>();
 
         Form3 imgForm;
-        Form4 form4 = new Form4();
+        Form5 form5;
+
+        public Form4 form4 = new Form4();
 
         public bool isOverwrite;
         public bool isBatch;
 
+        public bool isCopyOverwrite;
+        public bool showPreview;
+        public bool showImageList;
+        public int previewWidth;
+        public int imageListWidth;
+
         int index = 0;
+        int columnNum;
 
         public Form1()
         {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F); // for design in 96 DPI
             InitializeComponent();
-            Init_ImgListView();
-            Init_OrderListView();
 
-            ChkOverwrite.Checked = InsertFileNumber.Properties.Settings.Default.numberOverwrite;
+            ChkOverwrite.Checked = InsertFileNumber2.Properties.Settings.Default.numberOverwrite;
+            isCopyOverwrite = InsertFileNumber2.Properties.Settings.Default.chkCopyOverwrite;
+            showPreview = InsertFileNumber2.Properties.Settings.Default.chkPreview;
+            previewWidth = InsertFileNumber2.Properties.Settings.Default.PreviewWidth;
+            showImageList = InsertFileNumber2.Properties.Settings.Default.chkImageList;
+            imageListWidth = InsertFileNumber2.Properties.Settings.Default.ImageListWidth;
             form4.Show();
+
+            if (!showImageList) columnNum = 0;
+            else columnNum = 1;
+
+            Init_WorkListView();
+            Init_OrderListView();
 
             synchronizationContext = SynchronizationContext.Current; //context from UI thread  
         }
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            this.Location = InsertFileNumber.Properties.Settings.Default.MainFormLocation;
-            this.Size = InsertFileNumber.Properties.Settings.Default.MainFormSize;
+            this.Location = InsertFileNumber2.Properties.Settings.Default.MainFormLocation;
+            this.Size = InsertFileNumber2.Properties.Settings.Default.MainFormSize;
         }
 
-        private void Init_ImgListView()
+        private void Init_WorkListView()
         {
             // 리스트뷰 아이템을 업데이트 하기 시작.
             // 업데이트가 끝날 때까지 UI 갱신 중지.
-            ImgListView.BeginUpdate();
+            WorkListView.BeginUpdate();
 
             this.Refresh();
-            ImgListView.View = System.Windows.Forms.View.Details; ;// 목록 형으로 보이기
-            ImgListView.GridLines = true; // 그리드 라인을 보여준다.
-            ImgListView.FullRowSelect = true;  // 선택은 행으로 하기.
+            WorkListView.View = System.Windows.Forms.View.Details; ;// 목록 형으로 보이기
+            WorkListView.GridLines = true; // 그리드 라인을 보여준다.
+            WorkListView.FullRowSelect = true;  // 선택은 행으로 하기.
 
-            ImgListView.AllowDrop = true; // drag and drop 허용
+            WorkListView.AllowDrop = true; // drag and drop 허용
+
             // drag and drop
             //this.ImgListView.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragDrop);
             //this.ImgListView.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragEnter);
 
-            ImgListView.Columns.Add("#", 40);        //컬럼추가
-            ImgListView.Columns.Add("Name", 500);
-            ImgListView.Columns.Add("Path", 1000);
+            if (showImageList)
+            {
+                WorkListView.Columns.Add("Image", imageListWidth);        
+                WorkListView.Columns.Add("#", 40);        
+                WorkListView.Columns.Add("Name", 500);
+                WorkListView.Columns.Add("Path", 1000);
 
-            ImgListView.EndUpdate();
+                imageList.ImageSize = new Size(imageListWidth, imageListWidth);
+                imageList.ColorDepth = ColorDepth.Depth32Bit;
+                WorkListView.SmallImageList = imageList;
+            }
+            else
+            {
+                WorkListView.Columns.Add("#", 40);        
+                WorkListView.Columns.Add("Name", 500);
+                WorkListView.Columns.Add("Path", 1000);
+            }
+
+            WorkListView.EndUpdate();
         }
 
         //=============커서위치의 아이템=================
@@ -90,7 +123,7 @@ namespace InsertSortName
             return listView.GetItemAt(localPoint.X, localPoint.Y);
         }
 
-        private void ImgListView_DragEnter(object sender, DragEventArgs e)
+        private void WorkListView_DragEnter(object sender, DragEventArgs e)
         {
             // If the data is a file or a bitmap, display the copy cursor.
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -108,7 +141,7 @@ namespace InsertSortName
 
         }
 
-        private void ImgListView_DragDrop(object sender, DragEventArgs e)
+        private void WorkListView_DragDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
@@ -121,7 +154,7 @@ namespace InsertSortName
                     for (int i = 0; i < files.Length; i++)
                     {
                         // 중복 검사
-                        ImageInfo repeatItem = imageList.Find(x => x.filePath == files[i]);
+                        ImageInfo repeatItem = workList.Find(x => x.filePath == files[i]);
                         if (repeatItem != null)
                         {
                             if (!isBatch)
@@ -150,22 +183,26 @@ namespace InsertSortName
                             //Console.WriteLine("ExitForm2");
                         }
 
-                        //ImgListView 추가
-                        string[] viewItemCol = new string[3];
-                        viewItemCol[0] = index.ToString();
-                        viewItemCol[1] = Path.GetFileName(files[i]);
-                        viewItemCol[2] = files[i];
-
-                        ListViewItem viewItem = new ListViewItem(viewItemCol);
-
-                        ImgListView.Items.Add(viewItem);
+                        if (showImageList)
+                        {
+                            Image image = Image.FromFile(files[i]);
+                            image = resizeImage(image, new Size(256, 256));
+                            imageList.Images.Add(index.ToString(), image);
+                            ListViewItem listViewItem = new ListViewItem(new string[] { "", index.ToString(), Path.GetFileName(files[i]), files[i] }, index);
+                            WorkListView.Items.Add(listViewItem);
+                        }
+                        else
+                        {
+                            ListViewItem listViewItem = new ListViewItem(new string[] {index.ToString(), Path.GetFileName(files[i]), files[i] }, index);
+                            WorkListView.Items.Add(listViewItem);
+                        }
 
                         //imageList 추가
                         ImageInfo listItem = new ImageInfo();
                         listItem.filePath = files[i];
                         listItem.indexNum = index;
 
-                        imageList.Add(listItem);
+                        workList.Add(listItem);
                         index++;
                     }
 
@@ -176,12 +213,10 @@ namespace InsertSortName
                         {
                             int index = repeatFiles[i].indexNum;
 
-                            ListViewItem item = ImgListView.FindItemWithText(index.ToString());
+                            ListViewItem item = WorkListView.FindItemWithText(index.ToString());
 
-                            ImgListView.Items.Remove(item);
-                            imageList.Remove(repeatFiles[i]);
-
-                            //Console.WriteLine(item.SubItems[0].Text + " / " + item.SubItems[1].Text + " / " + item.SubItems[2].Text);
+                            WorkListView.Items.Remove(item);
+                            workList.Remove(repeatFiles[i]);
                         }
                     }
                     isBatch = false;
@@ -192,20 +227,64 @@ namespace InsertSortName
             {
                 var dropItems = (List<ListViewItem>)e.Data.GetData(typeof(List<ListViewItem>));
 
-                if (dropItems[0].ListView == ImgListView)
+                if (dropItems[0].ListView == WorkListView)
                 {
-                    AddLvToLv(ImgListView, imageList, imageList, dropItems, imageListindexList, AddType.ToBetween);
+                    AddLvToLv(WorkListView, workList, workList, dropItems, workListindexList, AddType.ToBetween);
                 }
                 else
                 {
-                    AddLvToLv(ImgListView, orderList, imageList, dropItems, orderListindexList, AddType.ToBetween);
+                    AddLvToLv(WorkListView, orderList, workList, dropItems, orderListindexList, AddType.ToBetween);
                 }
             }
         }
 
-        private void ImgListView_ItemDrag(object sender, ItemDragEventArgs e)
+        private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
         {
-            ItemDragFromListView(e, ImgListView);
+            //Get the image current width  
+            int sourceWidth = imgToResize.Width;
+            //Get the image current height  
+            int sourceHeight = imgToResize.Height;
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+            //Calulate  width with new desired size  
+            nPercentW = ((float)size.Width / (float)sourceWidth);
+            //Calculate height with new desired size  
+            nPercentH = ((float)size.Height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+            {
+                nPercent = nPercentH;
+            }
+            else
+            {
+                nPercent = nPercentW;
+            }
+
+            //New Width  
+            int destWidth = (int)(sourceWidth * nPercent);
+            //New Height  
+            int destHeight = (int)(sourceHeight * nPercent);
+            int space = Math.Abs(destWidth - destHeight);
+
+            Bitmap bmp = new Bitmap(size.Width, size.Height);
+            Graphics g = Graphics.FromImage(bmp);
+            g.Clear(Color.White);
+
+            if (destHeight < destWidth)
+            {
+                g.DrawImage(imgToResize, 0, space / 2, destWidth, destHeight);
+            }
+            else
+            {
+                g.DrawImage(imgToResize, space / 2, 0, destWidth, destHeight);
+            }
+            g.Dispose();
+            return (System.Drawing.Image)bmp;
+        }
+
+        private void WorkListView_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            ItemDragFromListView(e, WorkListView);
         }
 
         void ItemDragFromListView(ItemDragEventArgs e, ListView startListView)
@@ -220,7 +299,6 @@ namespace InsertSortName
                 if (!items.Contains(item))
                 {
                     items.Add(item);
-                    //Console.WriteLine(item.SubItems[0].Text);
                 }
 
             }
@@ -237,7 +315,7 @@ namespace InsertSortName
             }
 
             int fileNum;
-            string folderPath = Path.GetDirectoryName(OrderListView.Items[0].SubItems[2].Text);
+            string folderPath = Path.GetDirectoryName(OrderListView.Items[0].SubItems[2 + columnNum].Text);
             string newPath;
 
             string[] fileNames = new string[OrderListView.Items.Count];
@@ -248,8 +326,8 @@ namespace InsertSortName
 
             for (int i = 0; i < OrderListView.Items.Count; i++)
             {
-                fileNames[i] = OrderListView.Items[i].SubItems[1].Text;
-                oriFilePaths[i] = OrderListView.Items[i].SubItems[2].Text;
+                fileNames[i] = OrderListView.Items[i].SubItems[1 + columnNum].Text;
+                oriFilePaths[i] = OrderListView.Items[i].SubItems[2 + columnNum].Text;
 
                 if (StartNum.Text == "") fileNum = 0 + i;
                 else fileNum = int.Parse(StartNum.Text) + i;
@@ -272,8 +350,8 @@ namespace InsertSortName
                 {
 
                     newPath = Path.Combine(folderPath, fileNames[i]);
-                    OrderListView.Items[i].SubItems[1].Text = Path.GetFileName(newPath);
-                    OrderListView.Items[i].SubItems[2].Text = newPath;
+                    OrderListView.Items[i].SubItems[1 + columnNum].Text = Path.GetFileName(newPath);
+                    OrderListView.Items[i].SubItems[2 + columnNum].Text = newPath;
                     orderList[i].filePath = newPath;
 
                     System.IO.File.Move(oriFilePaths[i], newPath);
@@ -305,15 +383,15 @@ namespace InsertSortName
                     {
                         try
                         {
-                            System.IO.File.Copy(oriFilePaths[i], newPath);
+                            System.IO.File.Copy(oriFilePaths[i], newPath, isCopyOverwrite);
                         }
                         catch
                         {
                             MessageBox.Show("같은 이름의 파일이 존재합니다.");
                             for (int j = 0; j < fileNames.Length; j++)
                             {
-                                OrderListView.Items[j].SubItems[1].Text = Path.GetFileName(oriFilePaths[j]);
-                                OrderListView.Items[j].SubItems[2].Text = oriFilePaths[j];
+                                OrderListView.Items[j].SubItems[1 + columnNum].Text = Path.GetFileName(oriFilePaths[j]);
+                                OrderListView.Items[j].SubItems[2 + columnNum].Text = oriFilePaths[j];
                                 orderList[j].filePath = oriFilePaths[j];
                             }
                             return;
@@ -322,8 +400,8 @@ namespace InsertSortName
                     else
                     {
 
-                        OrderListView.Items[i].SubItems[1].Text = Path.GetFileName(newPath);
-                        OrderListView.Items[i].SubItems[2].Text = newPath;
+                        OrderListView.Items[i].SubItems[1 + columnNum].Text = Path.GetFileName(newPath);
+                        OrderListView.Items[i].SubItems[2 + columnNum].Text = newPath;
                         orderList[i].filePath = newPath;
 
                         System.IO.File.Move(oriFilePaths[i], newPath);
@@ -380,9 +458,23 @@ namespace InsertSortName
             //this.ImgListView.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragDrop);
             //this.ImgListView.DragEnter += new System.Windows.Forms.DragEventHandler(this.ImgListView_DragEnter);
 
-            OrderListView.Columns.Add("#", 40);        //컬럼추가
-            OrderListView.Columns.Add("Name", 500);
-            OrderListView.Columns.Add("Path", 1000);
+            if (showImageList)
+            {
+                OrderListView.Columns.Add("Image", imageListWidth);
+                OrderListView.Columns.Add("#", 40);        
+                OrderListView.Columns.Add("Name", 500);
+                OrderListView.Columns.Add("Path", 1000);
+                imageList.ImageSize = new Size(imageListWidth, imageListWidth);
+                imageList.ColorDepth = ColorDepth.Depth32Bit;
+                OrderListView.EndUpdate();
+                OrderListView.SmallImageList = imageList;
+            }
+            else
+            {
+                OrderListView.Columns.Add("#", 40);        
+                OrderListView.Columns.Add("Name", 500);
+                OrderListView.Columns.Add("Path", 1000);
+            }
 
             OrderListView.EndUpdate();
         }
@@ -418,7 +510,7 @@ namespace InsertSortName
                 for (int i = 0; i < items.Count; i++)
                 {
                     items[i].ListView.Items.Remove(items[i]);
-                    startList.Remove(startList.Find(x => x.indexNum == int.Parse(items[i].SubItems[0].Text)));
+                    startList.Remove(startList.Find(x => x.indexNum == int.Parse(items[i].SubItems[0 + columnNum].Text)));
                 }
 
                 switch (aType)
@@ -431,8 +523,8 @@ namespace InsertSortName
 
                             // 리스트 형식으로 전환
                             ImageInfo listItem = new ImageInfo();
-                            listItem.filePath = items[i].SubItems[2].Text;
-                            listItem.indexNum = int.Parse(items[i].SubItems[0].Text);
+                            listItem.filePath = items[i].SubItems[2 + columnNum].Text;
+                            listItem.indexNum = int.Parse(items[i].SubItems[0 + columnNum].Text);
 
                             //Console.WriteLine(rowNum2.Index);
                             // 리스트 뷰/리스트 이동
@@ -442,6 +534,7 @@ namespace InsertSortName
                         }
                         //Console.WriteLine(items[0].Index);
                         focusedListView.Items[selectIndex].Focused = true;
+                        items[0].EnsureVisible();
                         break;
 
                     case AddType.ToDown:
@@ -452,13 +545,14 @@ namespace InsertSortName
 
                             // 리스트 형식으로 전환
                             ImageInfo listItem = new ImageInfo();
-                            listItem.filePath = items[i].SubItems[2].Text;
-                            listItem.indexNum = int.Parse(items[i].SubItems[0].Text);
+                            listItem.filePath = items[i].SubItems[2 + columnNum].Text;
+                            listItem.indexNum = int.Parse(items[i].SubItems[0 + columnNum].Text);
 
                             // 리스트 뷰/리스트 이동
                             targetListView.Items.Insert(i + selectIndex + 1, items[i]);
                             endList.Insert(i + selectIndex + 1, listItem);
                         }
+                        items[items.Count - 1].EnsureVisible();
                         break;
 
                     case AddType.ToBetween:
@@ -466,8 +560,8 @@ namespace InsertSortName
                         {
                             // 리스트 형식으로 전환
                             ImageInfo listItem = new ImageInfo();
-                            listItem.filePath = items[i].SubItems[2].Text;
-                            listItem.indexNum = int.Parse(items[i].SubItems[0].Text);
+                            listItem.filePath = items[i].SubItems[2 + columnNum].Text;
+                            listItem.indexNum = int.Parse(items[i].SubItems[0 + columnNum].Text);
 
                             // 리스트 뷰 이동
                             //rowNum = -1 => 빈공간에 드랍
@@ -486,8 +580,8 @@ namespace InsertSortName
                         {
                             // 리스트 형식으로 전환
                             ImageInfo listItem = new ImageInfo();
-                            listItem.filePath = items[i].SubItems[2].Text;
-                            listItem.indexNum = int.Parse(items[i].SubItems[0].Text);
+                            listItem.filePath = items[i].SubItems[2 + columnNum].Text;
+                            listItem.indexNum = int.Parse(items[i].SubItems[0 + columnNum].Text);
 
                             //Console.WriteLine(rowNum2.Index);
                             // 리스트 뷰/리스트 이동
@@ -508,7 +602,7 @@ namespace InsertSortName
                 for (int i = 0; i < items.Count; i++)
                 {
                     //중복 검사
-                    ImageInfo repeatItem = endList.Find(x => x.filePath == items[i].SubItems[2].Text);
+                    ImageInfo repeatItem = endList.Find(x => x.filePath == items[i].SubItems[2 + columnNum].Text);
                     if (repeatItem != null)
                     {
                         if (!isBatch)
@@ -536,12 +630,12 @@ namespace InsertSortName
 
                     //아이템 드랍 전에 리스트뷰에서 제거
                     items[i].ListView.Items.Remove(items[i]);
-                    startList.Remove(startList.Find(x => x.indexNum == int.Parse(items[i].SubItems[0].Text)));
+                    startList.Remove(startList.Find(x => x.indexNum == int.Parse(items[i].SubItems[0 + columnNum].Text)));
 
                     // 리스트 형식으로 전환
                     ImageInfo listItem = new ImageInfo();
-                    listItem.filePath = items[i].SubItems[2].Text;
-                    listItem.indexNum = int.Parse(items[i].SubItems[0].Text);
+                    listItem.filePath = items[i].SubItems[2 + columnNum].Text;
+                    listItem.indexNum = int.Parse(items[i].SubItems[0 + columnNum].Text);
 
                     switch (aType)
                     {
@@ -580,8 +674,6 @@ namespace InsertSortName
 
                         targetListView.Items.Remove(item);
                         endList.Remove(repeatFiles[i]);
-
-                        //Console.WriteLine(item.SubItems[0].Text + " / " + item.SubItems[1].Text + " / " + item.SubItems[2].Text);
                     }
                 }
                 isBatch = false;
@@ -627,7 +719,7 @@ namespace InsertSortName
                 }
                 else
                 {
-                    AddLvToLv(OrderListView, imageList, orderList, dropItems, imageListindexList, AddType.ToBetween);
+                    AddLvToLv(OrderListView, workList, orderList, dropItems, workListindexList, AddType.ToBetween);
                 }
             }
         }
@@ -644,54 +736,56 @@ namespace InsertSortName
 
         private void BtnListClear1_Click(object sender, EventArgs e)
         {
-            ImgListView.Items.Clear();
-            imageList.Clear();
+            WorkListView.Items.Clear();
+            workList.Clear();
+            workListindexList.Clear();
         }
 
         private void BtnRemove1_Click(object sender, EventArgs e)
         {
-            DeleteItem(ImgListView, imageList, imgListView_SelectedItemList);
+            DeleteItem(WorkListView, workList, workListindexList, workListView_SelectedItemList);
         }
 
         private void BtnListClear2_Click(object sender, EventArgs e)
         {
             OrderListView.Items.Clear();
             orderList.Clear();
+            orderListindexList.Clear();
         }
 
         private void BtnRemove2_Click(object sender, EventArgs e)
         {
-            DeleteItem(OrderListView, orderList, orderListView_SelectedItemList);
+            DeleteItem(OrderListView, orderList, orderListindexList, orderListView_SelectedItemList);
         }
 
         private void BtnToTop_Click(object sender, EventArgs e)
         {
-            if (ImgListView.SelectedItems.Count > 0)
+            if (WorkListView.SelectedItems.Count > 0)
             {
 
                 //선택된 아이템
-                imgListView_SelectedItemList.Clear();
-                foreach (ListViewItem item in ImgListView.SelectedItems)
+                workListView_SelectedItemList.Clear();
+                foreach (ListViewItem item in WorkListView.SelectedItems)
                 {
-                    imgListView_SelectedItemList.Add(item);
+                    workListView_SelectedItemList.Add(item);
                 }
 
-                AddLvToLv(OrderListView, imageList, orderList, imgListView_SelectedItemList, imageListindexList, AddType.ToTop);
+                AddLvToLv(OrderListView, workList, orderList, workListView_SelectedItemList, workListindexList, AddType.ToTop);
             }
         }
 
         private void BtnToEnd_Click(object sender, EventArgs e)
         {
-            if (ImgListView.SelectedItems.Count > 0)
+            if (WorkListView.SelectedItems.Count > 0)
             {
                 // 선택된 아이템
-                imgListView_SelectedItemList.Clear();
-                foreach (ListViewItem item in ImgListView.SelectedItems)
+                workListView_SelectedItemList.Clear();
+                foreach (ListViewItem item in WorkListView.SelectedItems)
                 {
-                    imgListView_SelectedItemList.Add(item);
+                    workListView_SelectedItemList.Add(item);
                 }
 
-                AddLvToLv(OrderListView, imageList, orderList, imgListView_SelectedItemList, imageListindexList, AddType.ToEnd);
+                AddLvToLv(OrderListView, workList, orderList, workListView_SelectedItemList, workListindexList, AddType.ToEnd);
             }
         }
 
@@ -700,10 +794,10 @@ namespace InsertSortName
             int form_w = (this.Size.Width - 240) / 2;
             int listView_h = this.Size.Height - 160;
 
-            ImgListView.Size = new Size(form_w, listView_h);
+            WorkListView.Size = new Size(form_w, listView_h);
             OrderListView.Size = new Size(form_w, listView_h);
 
-            ImgListView.Location = new Point(40, 45);
+            WorkListView.Location = new Point(40, 45);
             OrderListView.Location = new Point(108 + form_w, 45);
 
             BtnToTop.Location = new Point(43 + form_w, BtnToTop.Location.Y);
@@ -716,52 +810,52 @@ namespace InsertSortName
             BtnRemove2.Location = new Point(108 + form_w * 2 - 83, BtnRemove1.Location.Y);
         }
 
-        private void ImgListView_KeyDown(object sender, KeyEventArgs e)
+        private void WorkListView_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
             {
-                DeleteItem(ImgListView, imageList, imgListView_SelectedItemList);
+                DeleteItem(WorkListView, workList, workListindexList, workListView_SelectedItemList);
             }
             else if (e.Modifiers == Keys.Control && e.KeyCode == Keys.A)
             {
-                SelectAll(ImgListView);
+                SelectAll(WorkListView);
             }
             else if (e.Modifiers == Keys.Control && e.KeyCode == Keys.X)
             {
                 e.Handled = true;
-                AddItemsShrotCut(ImgListView, ImgListView, imageList, imageList, imgListView_SelectedItemList, imageListindexList, AddType.ToEnd);
+                AddItemsShrotCut(WorkListView, WorkListView, workList, workList, workListView_SelectedItemList, workListindexList, AddType.ToEnd);
             }
             else if (e.Modifiers == Keys.Control && (e.KeyCode == Keys.Up || e.KeyCode == Keys.W))
             {
-                AddItemsShrotCut(ImgListView, ImgListView, imageList, imageList, imgListView_SelectedItemList, imageListindexList, AddType.ToUp);
+                AddItemsShrotCut(WorkListView, WorkListView, workList, workList, workListView_SelectedItemList, workListindexList, AddType.ToUp);
             }
             else if (e.Modifiers == Keys.Control && (e.KeyCode == Keys.Down || e.KeyCode == Keys.S))
             {
-                AddItemsShrotCut(ImgListView, ImgListView, imageList, imageList, imgListView_SelectedItemList, imageListindexList, AddType.ToDown);
+                AddItemsShrotCut(WorkListView, WorkListView, workList, workList, workListView_SelectedItemList, workListindexList, AddType.ToDown);
             }
             else if (e.KeyCode == Keys.W)
             {
-                SelectItem(e, ImgListView, imageListindexList, true);
+                SelectItem(e, WorkListView, workListindexList, true);
             }
             else if (e.KeyCode == Keys.S)
             {
-                SelectItem(e, ImgListView, imageListindexList, false);
+                SelectItem(e, WorkListView, workListindexList, false);
             }
             else if (e.Modifiers == Keys.Shift && (e.KeyCode == Keys.Right || e.KeyCode == Keys.D))
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
-                AddItemsShrotCut(ImgListView, OrderListView, imageList, orderList, imgListView_SelectedItemList, imageListindexList, AddType.ToEnd);
+                AddItemsShrotCut(WorkListView, OrderListView, workList, orderList, workListView_SelectedItemList, workListindexList, AddType.ToEnd);
             }
             else if (e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Space)
             {
                 e.Handled = true;
-                RemoveColorItem(ImgListView);
+                RemoveColorItem(WorkListView);
             }
             else if (e.Modifiers == Keys.Control && e.KeyCode == Keys.Space)
             {
                 e.Handled = true;
-                AddColorItem(ImgListView);
+                AddColorItem(WorkListView);
             }
 
         }
@@ -770,7 +864,7 @@ namespace InsertSortName
         {
             if (e.KeyCode == Keys.Delete)
             {
-                DeleteItem(OrderListView, orderList, orderListView_SelectedItemList);
+                DeleteItem(OrderListView, orderList, orderListindexList, orderListView_SelectedItemList);
             }
             else if (e.Modifiers == Keys.Control && e.KeyCode == Keys.A)
             {
@@ -801,7 +895,7 @@ namespace InsertSortName
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
-                AddItemsShrotCut(OrderListView, ImgListView, orderList, imageList, orderListView_SelectedItemList, orderListindexList, AddType.ToEnd);
+                AddItemsShrotCut(OrderListView, WorkListView, orderList, workList, orderListView_SelectedItemList, orderListindexList, AddType.ToEnd);
             }
             else if (e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Space)
             {
@@ -815,7 +909,7 @@ namespace InsertSortName
             }
         }
 
-        private void DeleteItem(ListView listView, List<ImageInfo> dataList, List<ListViewItem> selectList)
+        private void DeleteItem(ListView listView, List<ImageInfo> dataList, List<int> indexList, List<ListViewItem> selectList)
         {
             if (listView.SelectedItems.Count > 0)
             {
@@ -830,9 +924,11 @@ namespace InsertSortName
                 for (int i = 0; i < selectList.Count; i++)
                 {
                     listView.Items.Remove(selectList[i]);
-                    dataList.Remove(dataList.Find(x => x.indexNum == int.Parse(selectList[i].SubItems[0].Text)));
-                }
+                    dataList.Remove(dataList.Find(x => x.indexNum == int.Parse(selectList[i].SubItems[0 + columnNum].Text)));
+                    indexList.Remove(selectList[i].Index);
 
+                }
+                if (!listView.Focused) listView.Focus();
                 if (listView.FocusedItem != null) listView.FocusedItem.Selected = true;
             }
         }
@@ -875,6 +971,7 @@ namespace InsertSortName
                 {
                     listView.Items[targetIndex].Selected = true;
                     listView.Items[targetIndex].Focused = true;
+                    listView.Items[targetIndex].EnsureVisible();
                 }
                 else
                 {
@@ -883,6 +980,7 @@ namespace InsertSortName
 
                     listView.Items[targetIndex].Selected = false;
                     listView.Items[targetIndex].Focused = true;
+                    listView.Items[targetIndex].EnsureVisible();
                 }
             }
             else
@@ -902,6 +1000,7 @@ namespace InsertSortName
 
                 listView.Items[targetIndex].Selected = true;
                 listView.Items[targetIndex].Focused = true;
+                listView.Items[targetIndex].EnsureVisible();
             }
         }
 
@@ -917,6 +1016,7 @@ namespace InsertSortName
                 }
 
                 AddLvToLv(targetListView, startList, endList, viewItems, indexList, aType);
+
             }
         }
 
@@ -936,29 +1036,27 @@ namespace InsertSortName
             }
         }
         
-
-
         int num1;
 
-        private async void ImgListView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        private async void WorkListView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             if (e.IsSelected)
             {
-                imageListindexList.Add(e.ItemIndex);
+                workListindexList.Add(e.ItemIndex);
             }
             else
             {
-                imageListindexList.Remove(e.ItemIndex);
+                workListindexList.Remove(e.ItemIndex);
             }
 
             if (Application.OpenForms.OfType<Form3>().Any())
             {
-                if (ImgListView.SelectedItems.Count > 0 && ImgListView.Focused)
+                if (WorkListView.SelectedItems.Count > 0 && WorkListView.Focused)
                 {
                     await Task.Run(() =>
                     {
                         num1++;
-                        UpdateImage(e, ImgListView, imageListindexList);
+                        UpdateImage(e, WorkListView, workListindexList);
                     });
 
                     //Console.WriteLine(count1++);
@@ -996,9 +1094,8 @@ namespace InsertSortName
         {
             var timeNow = DateTime.Now;
 
-            if ((DateTime.Now - previousTime).Milliseconds <= 10) 
+            if ((DateTime.Now - previousTime).Milliseconds <= 5) 
             {
-                //Console.WriteLine("return");
                 previousTime = timeNow;
                 return;
             }
@@ -1010,11 +1107,9 @@ namespace InsertSortName
                 if(indexList.Count > 0 && listView.Items.Count > 0)
                 {
                     //Console.WriteLine(indexList.Last());
-                    imgForm.filePath = listView.Items[indexList.Last()].SubItems[2].Text;
+                    imgForm.filePath = listView.Items[indexList.Last()].SubItems[2 + columnNum].Text;
                     imgForm.LoadImage();
                 }
-                
-
             }), num1);
 
             previousTime = timeNow;
@@ -1022,15 +1117,21 @@ namespace InsertSortName
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            InsertFileNumber.Properties.Settings.Default.numberOverwrite = ChkOverwrite.Checked;
-            InsertFileNumber.Properties.Settings.Default.MainFormLocation = this.Location;
-            InsertFileNumber.Properties.Settings.Default.MainFormSize = this.Size;
-            InsertFileNumber.Properties.Settings.Default.Save();
+            InsertFileNumber2.Properties.Settings.Default.numberOverwrite = ChkOverwrite.Checked;
+            InsertFileNumber2.Properties.Settings.Default.MainFormLocation = this.Location;
+            InsertFileNumber2.Properties.Settings.Default.MainFormSize = this.Size;
+            InsertFileNumber2.Properties.Settings.Default.numberOverwrite = ChkOverwrite.Checked;
+            InsertFileNumber2.Properties.Settings.Default.chkCopyOverwrite = isCopyOverwrite;
+            InsertFileNumber2.Properties.Settings.Default.chkPreview = showPreview;
+            InsertFileNumber2.Properties.Settings.Default.PreviewWidth = previewWidth;
+            InsertFileNumber2.Properties.Settings.Default.chkImageList = showImageList;
+            InsertFileNumber2.Properties.Settings.Default.ImageListWidth = imageListWidth;
+            InsertFileNumber2.Properties.Settings.Default.Save();
         }
 
         void PopUpImage(ListView listView)
         {
-            if (listView.PointToClient(Cursor.Position).X < 40)
+            if (showPreview && listView.PointToClient(Cursor.Position).X < listView.Columns[0].Width)
             {
                 ListViewItem pointItem = GetItemFromPoint(listView, Cursor.Position);
 
@@ -1042,7 +1143,7 @@ namespace InsertSortName
 
                 ListView focusedList;
 
-                if (ImgListView.SelectedItems.Count > 0) focusedList = ImgListView;
+                if (WorkListView.SelectedItems.Count > 0) focusedList = WorkListView;
                 else focusedList = OrderListView;
 
                 if (!focusedList.Focused)
@@ -1050,7 +1151,7 @@ namespace InsertSortName
                     focusedList.Focus();
                 }
 
-                form4.LoadImage(pointItem.SubItems[2].Text);
+                form4.LoadImage(pointItem.SubItems[2 + columnNum].Text, previewWidth);
             }
             else
             {
@@ -1058,12 +1159,12 @@ namespace InsertSortName
             }
         }
 
-        private void ImgListView_MouseMove(object sender, MouseEventArgs e)
+        private void WorkListView_MouseMove(object sender, MouseEventArgs e)
         {
-            PopUpImage(ImgListView);
+            PopUpImage(WorkListView);
         }
 
-        private void ImgListView_MouseLeave(object sender, EventArgs e)
+        private void WorkListView_MouseLeave(object sender, EventArgs e)
         {
             form4.Visible = false;
         }
@@ -1078,23 +1179,31 @@ namespace InsertSortName
             form4.Visible = false;
         }
 
-        private void ImgListView_MouseDown(object sender, MouseEventArgs e)
+        private void WorkListView_MouseDown(object sender, MouseEventArgs e)
         {
             if(OrderListView.SelectedItems.Count > 0) OrderListView.SelectedItems.Clear();
         }
 
         private void OrderListView_MouseDown(object sender, MouseEventArgs e)
         {
-            if(ImgListView.SelectedItems.Count > 0) ImgListView.SelectedItems.Clear();
+            if(WorkListView.SelectedItems.Count > 0) WorkListView.SelectedItems.Clear();
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void BtnSetting_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < orderListindexList.Count; i++)
+            if (Application.OpenForms.OfType<Form5>().Any())
             {
-                Console.WriteLine(orderListindexList[i]);
+                form5.Close();
+                form5 = new Form5();
+                form5.Show();
             }
+            else
+            {
+                form5 = new Form5();
+                form5.Show();
+            }
+
         }
     }
 
