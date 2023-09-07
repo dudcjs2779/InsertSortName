@@ -98,6 +98,7 @@
             this.WorkListView.UseCompatibleStateImageBehavior = false;
             this.WorkListView.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.WorkListView_ItemDrag);
             this.WorkListView.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.WorkListView_ItemSelectionChanged);
+            this.WorkListView.SelectedIndexChanged += new System.EventHandler(this.WorkListView_SelectedIndexChanged);
             this.WorkListView.DragDrop += new System.Windows.Forms.DragEventHandler(this.WorkListView_DragDrop);
             this.WorkListView.DragEnter += new System.Windows.Forms.DragEventHandler(this.WorkListView_DragEnter);
             this.WorkListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.WorkListView_KeyDown);

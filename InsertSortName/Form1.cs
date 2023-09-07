@@ -1205,6 +1205,11 @@ namespace InsertFileNumber2
             }
 
         }
+
+        private void WorkListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
     class ImageInfo
