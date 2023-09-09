@@ -9,7 +9,7 @@ https://youtu.be/_clAWDMP4eo?si=r_zKaI5Rr7yi0niQ
 https://youtu.be/n3YtdVrI6QE?si=osVdqQiql_x2PMbw
 </br></br>
 ## 메인 화면
-![Main](https://github.com/dudcjs2779/InsertSortName/assets/42354230/1c2dd7df-cf7f-4361-9d11-ef29a9f04ce2)
+![Main](https://github.com/dudcjs2779/InsertSortName/assets/42354230/6c3044c4-e5e6-4c9a-b349-d045632d2b05)
 
 1. 시작 숫자 입력: 입력한 숫자를 기준으로 순차적으로 번호가 매겨짐
 2. 순서 덮어쓰기: 체크하면 앞에 문자 5개를 지우고 숫자번호를 추가함.(Webui 설정에서 "이미지를 저장할 때 파일명에 숫자 추가하기" 체크하고 쓰길 권장)
