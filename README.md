@@ -1,4 +1,5 @@
 # InsertSortName
+이미지 순서 정렬 프로그램
 
 InsertSortName/bin/Release/InsertFileNumber2.exe 파일로 실행
 
